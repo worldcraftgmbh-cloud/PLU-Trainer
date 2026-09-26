@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="de" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PLU Leergut Trainer - HUD Gaming Edition</title>
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            hud: {
+              bg: '#040711',
+              card: '#0f172a',
+              cardBorder: '#1e293b',
+              emerald: '#10b981',
+              emeraldGlow: '#059669',
+              red: '#ef4444',
+              cyan: '#06b6d4'
+            }
+          },
+          fontFamily: {
+            sans: ['Segoe UI', 'Roboto', 'system-ui', 'sans-serif'],
+            mono: ['Consolas', 'Courier New', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Keyframe Animations for Gaming HUD */
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-7px); }
+      40%, 80% { transform: translateX(7px); }
+    }
+    .animate-shake {
+      animation: shake 0.35s cubic-bezier(.36,.07,.19,.97) both;
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 15px rgba(16, 185, 129, 0.3); }
+      50% { box-shadow: 0 0 25px rgba(16, 185, 129, 0.75); }
+    }
+    .neon-pulse {
+      animation: pulseGlow 1.8s infinite;
+    }
+
+    /* Scanline overlay for HUD aesthetic */
+    .hud-grid-bg {
+      background-color: #040711;
+      background-image: 
+        radial-gradient(circle at 50% 0%, rgba(16, 185, 129, 0.08) 0%, transparent 75%),
+        linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      background-size: 100% 100%, 30px 30px, 30px 30px;
+    }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0f172a;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #10b981;
+    }
+  </style>
+</head>
+<body class="hud-grid-bg text-slate-100 min-h-screen flex flex-col font-sans selection:bg-emerald-500 selection:text-black">
+
+  <!-- TOP HEADER / APP BAR -->
+  <header class="w-full border-b border-slate-800/80 bg-slate-900/90 backdrop-blur-md sticky top-0 z-40 shadow-lg">
+    <div class="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
+      <!-- Title & Branding -->
+      <div class="flex items-center gap-2.5">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-700 flex items-center justify-center text-slate-950 font-black text-xl shadow-md shadow-emerald-500/20">
+          ⚡
+        </div>
+        <div>
+          <h1 class="font-bold text-lg leading-tight tracking-wide text-white flex items-center gap-2">
+            PLU <span class="text-emerald-400">LEERGUT</span> TRAINER
+          </h1>
+          <p class="text-[11px] text-slate-400 font-mono tracking-wider">HUD GAMING EDITION • 50 ARTIKEL</p>
+        </div>
+      </div>
+
+      <!-- Controls Header: Audio Toggle & Quick Info -->
+      <div class="flex items-center gap-2">
+        <button id="soundToggleBtn" onclick="toggleAudio()" title="Sound An/Aus"
+          class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700/80 text-slate-300 hover:text-emerald-400 transition-all flex items-center gap-1.5 text-xs font-mono">
+          <span id="soundIcon">🔊</span>
+          <span class="hidden sm:inline" id="soundText">SOUND</span>
+        </button>
+        <button onclick="showStatsModal()" title="Gesamtstatistik"
+          class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700/80 text-slate-300 hover:text-emerald-400 transition-all flex items-center gap-1.5 text-xs font-mono">
+          <span>📊</span>
+          <span class="hidden sm:inline">STATS</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- MAIN NAVIGATION TABS -->
+    <div class="max-w-3xl mx-auto px-4 flex border-t border-slate-800/60">
+      <button id="tabQuizBtn" onclick="switchTab('quiz')" 
+        class="flex-1 py-2.5 text-center font-bold text-sm border-b-2 border-emerald-500 text-emerald-400 transition-all flex items-center justify-center gap-2 bg-emerald-500/5">
+        <span>🎯</span> Lernen & Quiz
+      </button>
+      <button id="tabLibraryBtn" onclick="switchTab('library')" 
+        class="flex-1 py-2.5 text-center font-bold text-sm border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition-all flex items-center justify-center gap-2">
+        <span>📚</span> Bibliothek (<span id="libraryCountBadge">50</span>)
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="flex-1 max-w-3xl w-full mx-auto p-3 sm:p-5 flex flex-col justify-start">
+
+    <!-- ================================================================= -->
+    <!-- TAB 1: QUIZ & LERNEN SCREEN                                      -->
+    <!-- ================================================================= -->
+    <section id="quizScreen" class="w-full flex flex-col gap-4">
+
+      <!-- ROUND OVERVIEW CARD (Shown before starting or after round finish) -->
+      <div id="quizStartCard" class="hidden rounded-2xl bg-slate-900/90 border border-slate-700/70 p-5 sm:p-6 text-center backdrop-blur-md shadow-xl">
+        <div class="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-3xl mx-auto mb-3 text-emerald-400">
+          🎮
+        </div>
+        <h2 class="text-xl sm:text-2xl font-black text-white mb-2 tracking-wide">LEITNER QUIZ SESSION</h2>
+        <p class="text-slate-300 text-sm max-w-md mx-auto mb-6">
+          Testen Sie Ihr Wissen mit 10 zufälligen Leergut-Fragen. Artikel mit niedrigerer Leitner-Stufe werden bevorzugt abgefragt.
+        </p>
+
+        <!-- Mode Selectors -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-md mx-auto mb-6 text-left">
+          <div class="p-3.5 rounded-xl bg-slate-800/80 border border-slate-700/80">
+            <span class="text-xs text-slate-400 font-mono block mb-1">SESSION LÄNGE</span>
+            <div class="text-sm font-bold text-emerald-400 flex items-center gap-2">
+              <span>⏱️</span> 10 Fragen pro Runde
+            </div>
+          </div>
+          <div class="p-3.5 rounded-xl bg-slate-800/80 border border-slate-700/80">
+            <span class="text-xs text-slate-400 font-mono block mb-1">BILDQUELLE</span>
+            <div class="text-sm font-bold text-cyan-400 flex items-center gap-2">
+              <span>📁</span> Ordner Leergut_Bilder/
+            </div>
+          </div>
+        </div>
+
+        <button onclick="startNewQuizRound()" 
+          class="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-base shadow-lg shadow-emerald-500/25 transition-all transform active:scale-95 flex items-center justify-center gap-2 mx-auto">
+          <span>🚀</span> QUIZ JETZT STARTEN
+        </button>
+      </div>
+
+      <!-- ACTIVE QUIZ CONTAINER (STRICT VERTICAL ORDER TOP TO BOTTOM) -->
+      <div id="quizActiveArea" class="flex flex-col gap-4">
+
+        <!-- 1. HEADER / FORTSCHRITT -->
+        <div class="rounded-2xl bg-slate-900/90 border border-slate-700/70 p-4 backdrop-blur-md shadow-lg">
+          <div class="flex items-center justify-between text-xs font-mono mb-2">
+            <span id="questionProgressText" class="text-emerald-400 font-bold tracking-wider">
+              FRAGE 1 VON 10
+            </span>
+            <div class="flex items-center gap-3">
+              <span id="hitRateBadge" class="px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-semibold">
+                Trefferquote: 100%
+              </span>
+              <span id="scoreText" class="text-slate-300 font-bold">
+                0 / 0 Richtig
+              </span>
+            </div>
+          </div>
+
+          <!-- Neon Progress Bar -->
+          <div class="w-full h-3 bg-slate-950 rounded-full overflow-hidden border border-slate-800 p-0.5">
+            <div id="quizProgressBar" 
+              class="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full transition-all duration-300 shadow-[0_0_10px_rgba(16,185,129,0.5)]"
+              style="width: 10%;"></div>
+          </div>
+        </div>
+
+        <!-- 2. FRAGETEXT -->
+        <div class="rounded-2xl bg-slate-900/90 border border-slate-700/70 p-4 sm:p-5 backdrop-blur-md shadow-lg text-center">
+          <div class="inline-block px-2.5 py-0.5 rounded-md bg-slate-800 border border-slate-700 text-xs font-mono text-cyan-400 mb-2" id="quizCategoryBadge">
+            BIERKASTEN
+          </div>
+          <h2 id="questionText" class="text-lg sm:text-xl md:text-2xl font-extrabold text-white tracking-wide leading-snug">
+            Welche PLU gehört zu: Bierkasten Duckstein 8 Fl.?
+          </h2>
+        </div>
+
+        <!-- 3. BILDBEREICH (STRIKTE VORGABE: CENTRED, SEPARATE LINE BELOW QUESTION, STRICTLY ABOVE BUTTONS) -->
+        <div class="w-full rounded-2xl bg-slate-900/90 border border-slate-700/70 p-2 sm:p-3 backdrop-blur-md shadow-lg flex items-center justify-center">
+          <div class="w-full h-[180px] sm:h-[200px] rounded-xl bg-slate-950 border border-slate-800/90 flex items-center justify-center overflow-hidden relative shadow-inner">
+            
+            <!-- Real Image Display -->
+            <img id="quizImage" src="" alt="Leergut Artikel" 
+              class="hidden max-h-full max-w-full object-contain p-2 rounded-lg transition-transform duration-200">
+            
+            <!-- Neutral Fixed-Size Placeholder (Keeps layout steady) -->
+            <div id="quizImagePlaceholder" class="flex flex-col items-center justify-center text-center p-4">
+              <div class="w-16 h-16 rounded-2xl bg-slate-900 border border-slate-700/80 flex items-center justify-center mb-2 shadow-inner text-emerald-400">
+                <svg class="w-9 h-9 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <!-- Crate / Bottle Graphic -->
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" 
+                    d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                  <circle cx="12" cy="12" r="2" fill="currentColor"/>
+                </svg>
+              </div>
+              <span class="text-xs font-bold text-slate-400 tracking-wider">NEUTRALER PLATZHALTER</span>
+              <span class="text-[11px] text-slate-500 mt-0.5">Keine Bilddatei in Leergut_Bilder/ hinterlegt</span>
+            </div>
+
+            <!-- Leitner Box Tag overlay -->
+            <div id="quizItemBoxTag" class="absolute top-2 right-2 px-2 py-0.5 rounded-md bg-slate-900/90 border border-slate-700 text-[11px] font-mono text-emerald-400">
+              BOX 1
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. ANTWORT-OPTIONEN (2x2 RASTER MIT 4 GROSSEN TOUCH-BUTTONS) -->
+        <div class="grid grid-cols-2 gap-3 sm:gap-4" id="optionsGrid">
+          <button onclick="handleAnswerSelect(0)" id="optBtn0" 
+            class="quiz-opt-btn min-h-[64px] sm:min-h-[72px] p-3 rounded-2xl bg-slate-900/90 border border-slate-700/80 hover:border-emerald-500/60 hover:bg-slate-800 text-white font-mono font-black text-xl sm:text-2xl shadow-md transition-all transform active:scale-95 flex items-center justify-center text-center">
+            ----
+          </button>
+          <button onclick="handleAnswerSelect(1)" id="optBtn1" 
+            class="quiz-opt-btn min-h-[64px] sm:min-h-[72px] p-3 rounded-2xl bg-slate-900/90 border border-slate-700/80 hover:border-emerald-500/60 hover:bg-slate-800 text-white font-mono font-black text-xl sm:text-2xl shadow-md transition-all transform active:scale-95 flex items-center justify-center text-center">
+            ----
+          </button>
+          <button onclick="handleAnswerSelect(2)" id="optBtn2" 
+            class="quiz-opt-btn min-h-[64px] sm:min-h-[72px] p-3 rounded-2xl bg-slate-900/90 border border-slate-700/80 hover:border-emerald-500/60 hover:bg-slate-800 text-white font-mono font-black text-xl sm:text-2xl shadow-md transition-all transform active:scale-95 flex items-center justify-center text-center">
+            ----
+          </button>
+          <button onclick="handleAnswerSelect(3)" id="optBtn3" 
+            class="quiz-opt-btn min-h-[64px] sm:min-h-[72px] p-3 rounded-2xl bg-slate-900/90 border border-slate-700/80 hover:border-emerald-500/60 hover:bg-slate-800 text-white font-mono font-black text-xl sm:text-2xl shadow-md transition-all transform active:scale-95 flex items-center justify-center text-center">
+            ----
+          </button>
+        </div>
+
+        <!-- Action / Next Question Controls -->
+        <div id="nextQuestionArea" class="hidden mt-1 text-center flex items-center justify-between gap-3">
+          <div id="feedbackMessage" class="text-sm font-bold text-emerald-400 flex items-center gap-2">
+            <!-- Dynamic feedback text -->
+          </div>
+          <button onclick="nextQuestion()" 
+            class="px-6 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-sm shadow-md shadow-emerald-500/20 transition-all flex items-center gap-1.5 ml-auto">
+            <span>NÄCHSTE FRAGE</span>
+            <span>➔</span>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- ROUND COMPLETED SUMMARY MODAL/CARD -->
+      <div id="quizSummaryCard" class="hidden rounded-2xl bg-slate-900/90 border border-slate-700/70 p-6 backdrop-blur-md shadow-2xl text-center">
+        <div class="w-16 h-16 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center text-3xl mx-auto mb-3">
+          🏆
+        </div>
+        <h2 class="text-2xl font-black text-white mb-1">RUNDE ABGESCHLOSSEN!</h2>
+        <p class="text-slate-400 text-sm mb-5">Ergebnis Ihrer 10 Quiz-Fragen</p>
+
+        <!-- Stats Circle / Score Card -->
+        <div class="grid grid-cols-2 gap-3 max-w-sm mx-auto mb-6">
+          <div class="p-4 rounded-xl bg-slate-800/80 border border-slate-700 text-center">
+            <span class="text-xs text-slate-400 font-mono block">RICHTIGE PLUs</span>
+            <span id="summaryCorrectCount" class="text-3xl font-black text-emerald-400">8 / 10</span>
+          </div>
+          <div class="p-4 rounded-xl bg-slate-800/80 border border-slate-700 text-center">
+            <span class="text-xs text-slate-400 font-mono block">TREFFERQUOTE</span>
+            <span id="summaryAccuracy" class="text-3xl font-black text-cyan-400">80%</span>
+          </div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+          <button onclick="startNewQuizRound()" 
+            class="flex-1 py-3 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-sm shadow-lg shadow-emerald-500/20 transition-all">
+            🔄 NEUE RUNDE STARTEN
+          </button>
+          <button onclick="switchTab('library')" 
+            class="flex-1 py-3 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-bold text-sm transition-all">
+            📚 ZUR BIBLIOTHEK
+          </button>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- TAB 2: VERWALTUNG / BIBLIOTHEK                                   -->
+    <!-- ================================================================= -->
+    <section id="libraryScreen" class="hidden w-full flex flex-col gap-4">
+
+      <!-- LIBRARY HEADER & CONTROLS -->
+      <div class="rounded-2xl bg-slate-900/90 border border-slate-700/70 p-4 sm:p-5 backdrop-blur-md shadow-lg flex flex-col gap-3">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h2 class="text-lg font-bold text-white flex items-center gap-2">
+              <span>📚</span> ARTIKEL & BILDER BIBLIOTHEK
+            </h2>
+            <p class="text-xs text-slate-400">Alle Bilder werden direkt aus dem Ordner <code class="text-emerald-400">Leergut_Bilder/</code> geladen.</p>
+          </div>
+          <!-- Global Storage Info & Export -->
+          <div class="flex items-center gap-2">
+            <button onclick="exportStatsJSON()" title="Lernstand exportieren" 
+              class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-mono text-slate-300 transition-all">
+              📤 Stats Export
+            </button>
+          </div>
+        </div>
+
+        <!-- Search Input & Filter Pills -->
+        <div class="flex flex-col sm:flex-row gap-2.5 mt-1">
+          <div class="relative flex-1">
+            <input type="text" id="librarySearchInput" oninput="filterLibrary()" 
+              placeholder="Name oder PLU-Code suchen (z. B. Duckstein oder 9010)..."
+              class="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition-all">
+            <span class="absolute left-3 top-2.5 text-slate-500 text-sm">🔍</span>
+          </div>
+          
+          <select id="libraryFilterSelect" onchange="filterLibrary()"
+            class="px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-sm text-slate-200 focus:outline-none focus:border-emerald-500 font-mono">
+            <option value="ALL">Alle Kategorien</option>
+            <option value="Bierkasten">Bierkästen</option>
+            <option value="PET-Kasten">PET-Kästen</option>
+            <option value="PET-Cycle">PET-Cycle</option>
+            <option value="AFG-Kasten">AFG-Kästen</option>
+            <option value="Einzelflasche">Einzelflaschen</option>
+            <option value="Fass">Fässer</option>
+            <option value="Leerkasten">Leerkästen / Rahmen</option>
+            <option value="Sonstiges">Sonstiges / Einweg</option>
+            <option value="HAS_IMAGE">Mit Ordner-Bild</option>
+            <option value="NO_IMAGE">Neutraler Platzhalter</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- ITEMS LIST CONTAINER -->
+      <div id="libraryItemsList" class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+        <!-- Rendered dynamically by JS -->
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- STATS & LEITNER MODAL -->
+  <div id="statsModal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="w-full max-w-md rounded-2xl bg-slate-900 border border-slate-700 p-5 shadow-2xl relative">
+      <button onclick="closeStatsModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-xl">✕</button>
+      
+      <div class="flex items-center gap-2 mb-4">
+        <span class="text-2xl">📊</span>
+        <h3 class="text-lg font-bold text-white">GESAMT-STATISTIK</h3>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3 mb-4">
+        <div class="p-3.5 rounded-xl bg-slate-800/80 border border-slate-700 text-center">
+          <span class="text-xs text-slate-400 font-mono block">GESAMTE ANTWORTEN</span>
+          <span id="statTotalAnswers" class="text-2xl font-black text-white">0</span>
+        </div>
+        <div class="p-3.5 rounded-xl bg-slate-800/80 border border-slate-700 text-center">
+          <span class="text-xs text-slate-400 font-mono block">GESAMT-TREFFERQUOTE</span>
+          <span id="statGlobalAccuracy" class="text-2xl font-black text-emerald-400">0%</span>
+        </div>
+      </div>
+
+      <!-- Leitner Boxes Overview -->
+      <h4 class="text-xs font-mono text-slate-400 mb-2 uppercase tracking-wider">Leitner-Stufen Verteilung (50 Artikel)</h4>
+      <div id="leitnerDistributionBars" class="flex flex-col gap-2 mb-5">
+        <!-- JS rendered distribution bars -->
+      </div>
+
+      <div class="flex gap-2">
+        <button onclick="resetAllStatsConfirm()" 
+          class="w-full py-2.5 rounded-xl bg-red-500/20 hover:bg-red-500/30 border border-red-500/40 text-red-400 font-bold text-xs transition-all">
+          ⚠️ Statistik zurücksetzen
+        </button>
+        <button onclick="closeStatsModal()" 
+          class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs border border-slate-700 transition-all">
+          Schließen
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="w-full border-t border-slate-800/80 bg-slate-900/60 py-3 text-center text-xs font-mono text-slate-500">
+    PLU LEERGUT TRAINER • BILDER AUS ORDNER LEERGUT_BILDER/ • LOCALSTORAGE NUR FÜR LEITNER-STATS
+  </footer>
+
+
+  <!-- ================================================================= -->
+  <!-- JAVASCRIPT APPLICATION LOGIC                                     -->
+  <!-- ================================================================= -->
+  <script>
+    // 50 COMPLETE DEFAULT DATASET WITH DIRECT IMAGE FOLDER PATHS
+    const defaultLeergutData = [
+      {"id": 1, "name": "Bierkasten: Duckstein (8 Fl.)", "plu": "9046", "image": "Leergut_Bilder/9046_Bierkasten__Duckstein__8_Fl.jpg"},
+      {"id": 2, "name": "Bierkasten: 10 Fl.", "plu": "9004", "image": null},
+      {"id": 3, "name": "Bierkasten: 11 Fl.", "plu": "9020", "image": "Leergut_Bilder/9020_Bierkasten__11_Fl.jpg"},
+      {"id": 4, "name": "Bierkasten: Bionade (12 Fl.)", "plu": "9014", "image": "Leergut_Bilder/9014_Bierkasten__Bionade__12_Fl.jpg"},
+      {"id": 5, "name": "Bierkasten: Grevensteiner (16 Fl.)", "plu": "9012", "image": "Leergut_Bilder/9012_Bierkasten__Grevensteiner__16.jpg"},
+      {"id": 6, "name": "Bierkasten: Standard (20 Fl.)", "plu": "9010", "image": "Leergut_Bilder/9010_Bierkasten__Standard__20_Fl.jpg"},
+      {"id": 7, "name": "Bierkasten: Standard (24 Fl.)", "plu": "9011", "image": "Leergut_Bilder/9011_Bierkasten__Standard__24_Fl.jpg"},
+      {"id": 8, "name": "Bierkasten: 27 Fl.", "plu": "8150", "image": "Leergut_Bilder/8150_Bierkasten__27_Fl.jpg"},
+      {"id": 9, "name": "Bierkasten: 30 Fl.", "plu": "9007", "image": "Leergut_Bilder/9007_Bierkasten__30_Fl.jpg"},
+      {"id": 10, "name": "Bierkasten: Mönchshof (9 BV)", "plu": "9022", "image": "Leergut_Bilder/9022_Bierkasten__Mönchshof__9_BV.jpg"},
+      {"id": 11, "name": "Bierkasten: Bügel (16 BV)", "plu": "9013", "image": "Leergut_Bilder/9013_Bierkasten__Bügel__16_BV.jpg"},
+      {"id": 12, "name": "Bierkasten: Bügel (20 BV)", "plu": "9008", "image": "Leergut_Bilder/9008_Bierkasten__Bügel__20_BV.jpg"},
+      {"id": 13, "name": "Bierkasten: Halbkasten (10 Fl.)", "plu": "9910", "image": "Leergut_Bilder/9910_Bierkasten__Halbkasten__10_Fl.jpg"},
+      {"id": 14, "name": "PET-Kasten: 6 Fl.", "plu": "9122", "image": "Leergut_Bilder/9122_PET-Kasten__6_Fl.jpg"},
+      {"id": 15, "name": "PET-Kasten: 9 Fl.", "plu": "9133", "image": "Leergut_Bilder/9133_PET-Kasten__9_Fl.jpg"},
+      {"id": 16, "name": "PET-Kasten: Apollinaris (10 Fl.)", "plu": "9121", "image": "Leergut_Bilder/9121_PET-Kasten__Apollinaris__10_Fl.jpg"},
+      {"id": 17, "name": "PET-Kasten: 12 Fl.", "plu": "9125", "image": "Leergut_Bilder/9125_PET-Kasten__12_Fl.jpg"},
+      {"id": 18, "name": "PET-Kasten: blau (12 Fl.)", "plu": "9149", "image": "Leergut_Bilder/9149_PET-Kasten__blau__12_Fl.jpg"},
+      {"id": 19, "name": "PET-Kasten: 20 Fl.", "plu": "9140", "image": "Leergut_Bilder/9140_PET-Kasten__20_Fl.jpg"},
+      {"id": 20, "name": "PET-Cycle: Volvic / Evian (6 Fl.)", "plu": "9003", "image": "Leergut_Bilder/9003_PET-Cycle__Volvic___Evian__6_F.jpg"},
+      {"id": 21, "name": "PET-Cycle: 9 Fl.", "plu": "9138", "image": "Leergut_Bilder/9138_PET-Cycle__9_Fl.jpg"},
+      {"id": 22, "name": "PET-Cycle: 12 Fl.", "plu": "9137", "image": "Leergut_Bilder/9137_PET-Cycle__12_Fl.jpg"},
+      {"id": 23, "name": "PET-Cycle: Coca Cola 0,5l (12 Fl.)", "plu": "9170", "image": "Leergut_Bilder/9170_PET-Cycle__Coca_Cola_0_5l__12.jpg"},
+      {"id": 24, "name": "Sonstiges: Weinkiste", "plu": "9154", "image": "Leergut_Bilder/9154_Sonstiges__Weinkiste.jpg"},
+      {"id": 25, "name": "Sonstiges: Rother 3,0 Ltr.", "plu": "9075", "image": "Leergut_Bilder/9075_Sonstiges__Rother_3_0_Ltr.jpg"},
+      {"id": 26, "name": "AFG-Kasten: 6 Fl.", "plu": "9112", "image": "Leergut_Bilder/9112_AFG-Kasten__6_Fl.jpg"},
+      {"id": 27, "name": "AFG-Kasten: Lauretana (6 Fl.)", "plu": "9163", "image": "Leergut_Bilder/9163_AFG-Kasten__Lauretana__6_Fl.jpg"},
+      {"id": 28, "name": "AFG-Kasten: 10 Fl.", "plu": "9131", "image": null},
+      {"id": 29, "name": "AFG-Kasten: Standard (12 Fl.)", "plu": "9110", "image": "Leergut_Bilder/9110_AFG-Kasten__Standard__12_Fl.jpg"},
+      {"id": 30, "name": "AFG-Kasten: Orangina (15 Fl.)", "plu": "9127", "image": "Leergut_Bilder/9127_AFG-Kasten__Orangina__15_Fl.jpg"},
+      {"id": 31, "name": "AFG-Kasten: S. Pellegrino (16 Fl.)", "plu": "9115", "image": "Leergut_Bilder/9115_AFG-Kasten__S__Pellegrino__16.jpg"},
+      {"id": 32, "name": "AFG-Kasten: 20 Fl.", "plu": "9113", "image": "Leergut_Bilder/9113_AFG-Kasten__20_Fl.jpg"},
+      {"id": 33, "name": "AFG-Kasten: Standard (24 Fl.)", "plu": "9111", "image": "Leergut_Bilder/9111_AFG-Kasten__Standard__24_Fl.jpg"},
+      {"id": 34, "name": "AFG-Kasten: Schweppes (24 Fl.)", "plu": "9029", "image": "Leergut_Bilder/9029_AFG-Kasten__Schweppes__24_Fl.jpg"},
+      {"id": 35, "name": "Einzelflasche: Bier", "plu": "9001", "image": "Leergut_Bilder/9001_Einzelflasche__Bier.jpg"},
+      {"id": 36, "name": "Einzelflasche: Schweppes 0,2l", "plu": "9028", "image": "Leergut_Bilder/9028_Einzelflasche__Schweppes_0_2l.jpg"},
+      {"id": 37, "name": "Einzelflasche: Bier BV (Bügel)", "plu": "9030", "image": "Leergut_Bilder/9030_Einzelflasche__Bier_BV__Bügel.jpg"},
+      {"id": 38, "name": "Einzelflasche: AFG", "plu": "9102", "image": "Leergut_Bilder/9102_Einzelflasche__AFG.jpg"},
+      {"id": 39, "name": "Einzelflasche: PET", "plu": "9103", "image": "Leergut_Bilder/9103_Einzelflasche__PET.jpg"},
+      {"id": 40, "name": "Einzelflasche: Atlanta / Spezi", "plu": "9108", "image": "Leergut_Bilder/9108_Einzelflasche__Atlanta___Spezi.jpg"},
+      {"id": 41, "name": "Einzelflasche: Weinflasche", "plu": "9155", "image": "Leergut_Bilder/9155_Einzelflasche__Weinflasche.jpg"},
+      {"id": 42, "name": "Einweg: DPG Dose / Einweg", "plu": "9254", "image": "Leergut_Bilder/9254_Einweg__DPG_Dose___Einweg.jpg"},
+      {"id": 43, "name": "Fass: Standard Fass", "plu": "9055", "image": "Leergut_Bilder/9055_Fass__Standard_Fass.jpg"},
+      {"id": 44, "name": "Fass: Perfect Draft mit Rahmen", "plu": "9049", "image": "Leergut_Bilder/9049_Fass__Perfect_Draft_mit_Rahmen.jpg"},
+      {"id": 45, "name": "Fass: Perfect Draft solo", "plu": "9052", "image": "Leergut_Bilder/9052_Fass__Perfect_Draft_solo.jpg"},
+      {"id": 46, "name": "Fass: Keggy Partyfass", "plu": "9016", "image": "Leergut_Bilder/9016_Fass__Keggy_Partyfass.jpg"},
+      {"id": 47, "name": "Leerkasten / Rahmen: AFG / Bier", "plu": "9000", "image": null},
+      {"id": 48, "name": "Leerkasten / Rahmen: PET", "plu": "9100", "image": null},
+      {"id": 49, "name": "Leerkasten / Rahmen: Rahmen halb", "plu": "9900", "image": null},
+      {"id": 50, "name": "Leerkasten / Rahmen: Lauretana", "plu": "9162", "image": null}
+    ];
+
+    // APPLICATION STATE
+    const STORAGE_KEY = 'plu_leergut_stats_v2';
+    let appData = [];
+    let soundEnabled = true;
+    let audioCtx = null;
+
+    // Quiz Session State
+    let quizQuestions = [];
+    let currentQuestionIndex = 0;
+    let roundCorrectCount = 0;
+    let roundWrongCount = 0;
+    let isAnsweredCurrent = false;
+
+    // INITIALIZATION
+    window.addEventListener('DOMContentLoaded', () => {
+      loadStorageData();
+      renderLibraryItems();
+      startNewQuizRound();
+    });
+
+    // LOCAL STORAGE MANAGEMENT (ONLY LEITNER STATS - NO BASE64 IMAGES!)
+    function loadStorageData() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        const storedStats = raw ? JSON.parse(raw) : [];
+
+        appData = defaultLeergutData.map(item => {
+          const stored = storedStats.find(s => s.id === item.id);
+          return {
+            ...item,
+            box: stored && stored.box ? stored.box : 1,
+            correctCount: stored && stored.correctCount ? stored.correctCount : 0,
+            wrongCount: stored && stored.wrongCount ? stored.wrongCount : 0
+          };
+        });
+      } catch (e) {
+        console.error('Error loading stats from localStorage:', e);
+        appData = defaultLeergutData.map(item => ({ ...item, box: 1, correctCount: 0, wrongCount: 0 }));
+      }
+    }
+
+    function saveStorageData() {
+      try {
+        // Save ONLY lightweight stats to localStorage
+        const statsOnly = appData.map(i => ({
+          id: i.id,
+          box: i.box || 1,
+          correctCount: i.correctCount || 0,
+          wrongCount: i.wrongCount || 0
+        }));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(statsOnly));
+      } catch (e) {
+        console.error('Error saving stats to localStorage:', e);
+      }
+    }
+
+    // WEB AUDIO API SOUND GENERATOR
+    function getAudioContext() {
+      if (!audioCtx) {
+        const AudioCtxClass = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AudioCtxClass();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      return audioCtx;
+    }
+
+    function playSound(type) {
+      if (!soundEnabled) return;
+      try {
+        const ctx = getAudioContext();
+        const now = ctx.currentTime;
+
+        if (type === 'correct') {
+          // Heller, doppelter Synth-Glockenton ("Ding!", 587.33 Hz -> 880 Hz)
+          const osc1 = ctx.createOscillator();
+          const gain1 = ctx.createGain();
+          osc1.type = 'sine';
+          osc1.frequency.setValueAtTime(587.33, now);
+          gain1.gain.setValueAtTime(0.25, now);
+          gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
+          osc1.connect(gain1);
+          gain1.connect(ctx.destination);
+          osc1.start(now);
+          osc1.stop(now + 0.14);
+
+          const osc2 = ctx.createOscillator();
+          const gain2 = ctx.createGain();
+          osc2.type = 'sine';
+          osc2.frequency.setValueAtTime(880, now + 0.07);
+          gain2.gain.setValueAtTime(0.35, now + 0.07);
+          gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.32);
+          osc2.connect(gain2);
+          gain2.connect(ctx.destination);
+          osc2.start(now + 0.07);
+          osc2.stop(now + 0.32);
+
+        } else if (type === 'wrong') {
+          // Dumpfer, tiefer Fehlerton ("Möööp/Brumm", 160 Hz Sägezahn)
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          const filter = ctx.createBiquadFilter();
+
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(160, now);
+          osc.frequency.exponentialRampToValueAtTime(110, now + 0.3);
+
+          filter.type = 'lowpass';
+          filter.frequency.setValueAtTime(550, now);
+
+          gain.gain.setValueAtTime(0.3, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+
+          osc.connect(filter);
+          filter.connect(gain);
+          gain.connect(ctx.destination);
+
+          osc.start(now);
+          osc.stop(now + 0.3);
+        }
+      } catch (e) {
+        console.error('Audio playback error:', e);
+      }
+    }
+
+    function toggleAudio() {
+      soundEnabled = !soundEnabled;
+      document.getElementById('soundIcon').innerText = soundEnabled ? '🔊' : '🔇';
+      document.getElementById('soundText').innerText = soundEnabled ? 'SOUND' : 'STUMM';
+    }
+
+    // TAB SWITCHING
+    function switchTab(tabName) {
+      const quizBtn = document.getElementById('tabQuizBtn');
+      const libBtn = document.getElementById('tabLibraryBtn');
+      const quizScreen = document.getElementById('quizScreen');
+      const libScreen = document.getElementById('libraryScreen');
+
+      if (tabName === 'quiz') {
+        quizScreen.classList.remove('hidden');
+        libScreen.classList.add('hidden');
+        quizBtn.className = "flex-1 py-2.5 text-center font-bold text-sm border-b-2 border-emerald-500 text-emerald-400 transition-all flex items-center justify-center gap-2 bg-emerald-500/5";
+        libBtn.className = "flex-1 py-2.5 text-center font-bold text-sm border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition-all flex items-center justify-center gap-2";
+      } else {
+        quizScreen.classList.add('hidden');
+        libScreen.classList.remove('hidden');
+        libBtn.className = "flex-1 py-2.5 text-center font-bold text-sm border-b-2 border-emerald-500 text-emerald-400 transition-all flex items-center justify-center gap-2 bg-emerald-500/5";
+        quizBtn.className = "flex-1 py-2.5 text-center font-bold text-sm border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition-all flex items-center justify-center gap-2";
+        renderLibraryItems();
+      }
+    }
+
+    // LEITNER WEIGHTED QUIZ ENGINE
+    function startNewQuizRound() {
+      document.getElementById('quizStartCard').classList.add('hidden');
+      document.getElementById('quizSummaryCard').classList.add('hidden');
+      document.getElementById('quizActiveArea').classList.remove('hidden');
+
+      roundCorrectCount = 0;
+      roundWrongCount = 0;
+      currentQuestionIndex = 0;
+
+      // Select 10 weighted items based on Leitner Box level
+      const weightedList = [];
+      appData.forEach(item => {
+        const weight = Math.max(1, 6 - (item.box || 1)); // Box 1 = weight 5, Box 5 = weight 1
+        for (let i = 0; i < weight; i++) {
+          weightedList.push(item);
+        }
+      });
+
+      // Pick 10 unique questions
+      const selected = new Set();
+      let attempts = 0;
+      while (selected.size < 10 && attempts < 500) {
+        attempts++;
+        const randomItem = weightedList[Math.floor(Math.random() * weightedList.length)];
+        selected.add(randomItem);
+      }
+
+      if (selected.size < 10) {
+        const shuffledAll = [...appData].sort(() => 0.5 - Math.random());
+        shuffledAll.forEach(item => {
+          if (selected.size < 10) selected.add(item);
+        });
+      }
+
+      quizQuestions = Array.from(selected).map(item => createQuestionObj(item));
+      renderCurrentQuestion();
+    }
+
+    function createQuestionObj(targetItem) {
+      const otherItems = appData.filter(i => i.id !== targetItem.id);
+      const shuffledOthers = [...otherItems].sort(() => 0.5 - Math.random());
+      
+      const distractors = [];
+      const usedPLUs = new Set([targetItem.plu]);
+      
+      for (const other of shuffledOthers) {
+        if (!usedPLUs.has(other.plu)) {
+          distractors.push(other.plu);
+          usedPLUs.add(other.plu);
+        }
+        if (distractors.length === 3) break;
+      }
+
+      const options = [
+        { plu: targetItem.plu, isCorrect: true },
+        ...distractors.map(p => ({ plu: p, isCorrect: false }))
+      ].sort(() => 0.5 - Math.random());
+
+      return {
+        item: targetItem,
+        options: options
+      };
+    }
+
+    function renderCurrentQuestion() {
+      isAnsweredCurrent = false;
+      document.getElementById('nextQuestionArea').classList.add('hidden');
+
+      const qObj = quizQuestions[currentQuestionIndex];
+      const item = qObj.item;
+
+      // 1. Header / Progress
+      document.getElementById('questionProgressText').innerText = `FRAGE ${currentQuestionIndex + 1} VON 10`;
+      const progressPercent = ((currentQuestionIndex + 1) / 10) * 100;
+      document.getElementById('quizProgressBar').style.width = `${progressPercent}%`;
+
+      const totalRoundAnswered = roundCorrectCount + roundWrongCount;
+      const hitRate = totalRoundAnswered > 0 ? Math.round((roundCorrectCount / totalRoundAnswered) * 100) : 100;
+      document.getElementById('hitRateBadge').innerText = `Trefferquote: ${hitRate}%`;
+      document.getElementById('scoreText').innerText = `${roundCorrectCount} / ${totalRoundAnswered} Richtig`;
+
+      // 2. Fragetext & Category Badge
+      const categoryName = item.name.includes(':') ? item.name.split(':')[0].trim() : 'LEERGUT';
+      document.getElementById('quizCategoryBadge').innerText = categoryName.toUpperCase();
+      document.getElementById('questionText').innerText = `Welche PLU gehört zu: ${item.name}?`;
+
+      // 3. Bildbereich (Centered, separate line below question, strictly above buttons)
+      const imgEl = document.getElementById('quizImage');
+      const placeholderEl = document.getElementById('quizImagePlaceholder');
+      document.getElementById('quizItemBoxTag').innerText = `BOX ${item.box || 1}`;
+
+      if (item.image) {
+        imgEl.src = item.image;
+        imgEl.onerror = function() {
+          // Fallback if local image file missing or broken
+          imgEl.classList.add('hidden');
+          placeholderEl.classList.remove('hidden');
+        };
+        imgEl.onload = function() {
+          imgEl.classList.remove('hidden');
+          placeholderEl.classList.add('hidden');
+        };
+      } else {
+        imgEl.classList.add('hidden');
+        imgEl.src = '';
+        placeholderEl.classList.remove('hidden');
+      }
+
+      // 4. Antwort-Optionen Reset & Render
+      qObj.options.forEach((opt, idx) => {
+        const btn = document.getElementById(`optBtn${idx}`);
+        btn.innerText = opt.plu;
+        btn.disabled = false;
+        btn.className = "quiz-opt-btn min-h-[64px] sm:min-h-[72px] p-3 rounded-2xl bg-slate-900/90 border border-slate-700/80 hover:border-emerald-500/60 hover:bg-slate-800 text-white font-mono font-black text-xl sm:text-2xl shadow-md transition-all transform active:scale-95 flex items-center justify-center text-center";
+      });
+    }
+
+    function handleAnswerSelect(selectedIdx) {
+      if (isAnsweredCurrent) return;
+      isAnsweredCurrent = true;
+
+      const qObj = quizQuestions[currentQuestionIndex];
+      const selectedOpt = qObj.options[selectedIdx];
+      const item = qObj.item;
+
+      // Disable all option buttons
+      qObj.options.forEach((_, idx) => {
+        document.getElementById(`optBtn${idx}`).disabled = true;
+      });
+
+      const feedbackMessage = document.getElementById('feedbackMessage');
+
+      if (selectedOpt.isCorrect) {
+        // CORRECT ANSWER
+        playSound('correct');
+        roundCorrectCount++;
+        
+        item.box = Math.min(5, (item.box || 1) + 1);
+        item.correctCount = (item.correctCount || 0) + 1;
+
+        const btn = document.getElementById(`optBtn${selectedIdx}`);
+        btn.className = "quiz-opt-btn min-h-[64px] sm:min-h-[72px] p-3 rounded-2xl bg-emerald-600 border-2 border-emerald-400 text-white font-mono font-black text-xl sm:text-2xl shadow-lg shadow-emerald-500/40 neon-pulse flex items-center justify-center text-center scale-[1.02]";
+
+        feedbackMessage.className = "text-sm font-bold text-emerald-400 flex items-center gap-2";
+        feedbackMessage.innerHTML = "<span>✅ Richtig!</span> <span class='text-xs font-normal text-slate-300'>+1 Leitner Stufe</span>";
+      } else {
+        // INCORRECT ANSWER
+        playSound('wrong');
+        roundWrongCount++;
+
+        item.box = 1;
+        item.wrongCount = (item.wrongCount || 0) + 1;
+
+        const selectedBtn = document.getElementById(`optBtn${selectedIdx}`);
+        selectedBtn.className = "quiz-opt-btn min-h-[64px] sm:min-h-[72px] p-3 rounded-2xl bg-red-600 border-2 border-red-400 text-white font-mono font-black text-xl sm:text-2xl shadow-lg shadow-red-500/40 animate-shake flex items-center justify-center text-center";
+
+        // Highlight True Answer
+        qObj.options.forEach((opt, idx) => {
+          if (opt.isCorrect) {
+            const correctBtn = document.getElementById(`optBtn${idx}`);
+            correctBtn.className = "quiz-opt-btn min-h-[64px] sm:min-h-[72px] p-3 rounded-2xl bg-emerald-950 border-2 border-emerald-400 text-emerald-300 font-mono font-black text-xl sm:text-2xl shadow-md flex items-center justify-center text-center neon-pulse";
+          }
+        });
+
+        feedbackMessage.className = "text-sm font-bold text-red-400 flex items-center gap-2";
+        feedbackMessage.innerHTML = `<span>❌ Falsch!</span> <span class='text-xs font-normal text-slate-300'>Richtige PLU ist <strong class='text-emerald-400 font-mono'>${item.plu}</strong></span>`;
+      }
+
+      saveStorageData();
+
+      const totalAnswered = roundCorrectCount + roundWrongCount;
+      const hitRate = Math.round((roundCorrectCount / totalAnswered) * 100);
+      document.getElementById('hitRateBadge').innerText = `Trefferquote: ${hitRate}%`;
+      document.getElementById('scoreText').innerText = `${roundCorrectCount} / ${totalAnswered} Richtig`;
+
+      document.getElementById('nextQuestionArea').classList.remove('hidden');
+    }
+
+    function nextQuestion() {
+      if (currentQuestionIndex < 9) {
+        currentQuestionIndex++;
+        renderCurrentQuestion();
+      } else {
+        showRoundSummary();
+      }
+    }
+
+    function showRoundSummary() {
+      document.getElementById('quizActiveArea').classList.add('hidden');
+      document.getElementById('quizSummaryCard').classList.remove('hidden');
+
+      document.getElementById('summaryCorrectCount').innerText = `${roundCorrectCount} / 10`;
+      const accuracy = Math.round((roundCorrectCount / 10) * 100);
+      document.getElementById('summaryAccuracy').innerText = `${accuracy}%`;
+    }
+
+
+    // =================================================================
+    // BIBLIOTHEK & ORDNER-BILD ANZEIGE LOGIC
+    // =================================================================
+    function renderLibraryItems() {
+      const container = document.getElementById('libraryItemsList');
+      const searchVal = document.getElementById('librarySearchInput').value.toLowerCase().trim();
+      const filterVal = document.getElementById('libraryFilterSelect').value;
+
+      document.getElementById('libraryCountBadge').innerText = appData.length;
+
+      let filtered = appData.filter(item => {
+        const matchesSearch = item.name.toLowerCase().includes(searchVal) || item.plu.includes(searchVal);
+        if (!matchesSearch) return false;
+
+        if (filterVal === 'ALL') return true;
+        if (filterVal === 'HAS_IMAGE') return !!item.image;
+        if (filterVal === 'NO_IMAGE') return !item.image;
+
+        return item.name.toLowerCase().includes(filterVal.toLowerCase());
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="col-span-full rounded-2xl bg-slate-900/90 border border-slate-800 p-8 text-center text-slate-400">
+            <span class="text-3xl block mb-2">🔍</span>
+            <p class="font-bold text-slate-300">Keine Leergut-Artikel gefunden</p>
+            <p class="text-xs text-slate-500 mt-1">Versuchen Sie den Suchbegriff oder den Filter anzupassen.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filtered.map(item => {
+        const total = (item.correctCount || 0) + (item.wrongCount || 0);
+        const hitRate = total > 0 ? Math.round(((item.correctCount || 0) / total) * 100) : 0;
+
+        return `
+          <div class="rounded-xl bg-slate-900/90 border border-slate-700/80 p-3.5 flex flex-col justify-between gap-3 shadow-md hover:border-slate-600 transition-all">
+            <!-- Header: Name & PLU Badge -->
+            <div class="flex items-start justify-between gap-2">
+              <div>
+                <span class="text-[11px] font-mono text-cyan-400 uppercase tracking-wider block mb-0.5">ID #${item.id}</span>
+                <h3 class="font-bold text-sm text-white leading-snug">${item.name}</h3>
+              </div>
+              <span class="px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-mono font-black text-sm tracking-wider shrink-0 shadow-sm">
+                PLU ${item.plu}
+              </span>
+            </div>
+
+            <!-- Thumbnail Display Area -->
+            <div class="w-full h-36 rounded-lg bg-slate-950 border border-slate-800 flex items-center justify-center overflow-hidden relative shadow-inner">
+              ${item.image ? `
+                <img src="${item.image}" alt="${item.name}" 
+                  onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                  class="max-h-full max-w-full object-contain p-1.5 rounded">
+                <div class="hidden flex-col items-center justify-center text-slate-600">
+                  <svg class="w-10 h-10 mb-1 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                  </svg>
+                  <span class="text-[11px] font-mono text-slate-500">Neutraler Platzhalter</span>
+                </div>
+              ` : `
+                <div class="flex flex-col items-center justify-center text-slate-600">
+                  <svg class="w-10 h-10 mb-1 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                  </svg>
+                  <span class="text-[11px] font-mono text-slate-500">Neutraler Platzhalter</span>
+                </div>
+              `}
+
+              <!-- Leitner Box Badge Overlay -->
+              <span class="absolute top-2 right-2 px-2 py-0.5 rounded bg-slate-900/90 border border-slate-700 text-[10px] font-mono text-emerald-400">
+                BOX ${item.box || 1}
+              </span>
+            </div>
+
+            <!-- Image Source Info Badge & Stats Bar -->
+            <div class="flex items-center justify-between text-[11px] font-mono text-slate-400 px-1 pt-1 border-t border-slate-800/80">
+              <span class="truncate">
+                ${item.image ? `<span class="text-emerald-400 font-bold">📷 Bild aus Ordner</span>` : `<span class="text-slate-500">📷 Neutraler Platzhalter</span>`}
+              </span>
+              <span>Richtig: <strong class="text-emerald-400">${item.correctCount || 0}</strong> / Falsch: <strong class="text-red-400">${item.wrongCount || 0}</strong></span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function filterLibrary() {
+      renderLibraryItems();
+    }
+
+
+    // =================================================================
+    // STATS & BACKUP EXPORT
+    // =================================================================
+    function showStatsModal() {
+      const modal = document.getElementById('statsModal');
+      modal.classList.remove('hidden');
+
+      let totalAnswers = 0;
+      let totalCorrect = 0;
+      const boxCounts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+
+      appData.forEach(item => {
+        totalCorrect += (item.correctCount || 0);
+        totalAnswers += (item.correctCount || 0) + (item.wrongCount || 0);
+        const b = item.box || 1;
+        boxCounts[b] = (boxCounts[b] || 0) + 1;
+      });
+
+      document.getElementById('statTotalAnswers').innerText = totalAnswers;
+      const globalAcc = totalAnswers > 0 ? Math.round((totalCorrect / totalAnswers) * 100) : 0;
+      document.getElementById('statGlobalAccuracy').innerText = `${globalAcc}%`;
+
+      const barsContainer = document.getElementById('leitnerDistributionBars');
+      barsContainer.innerHTML = [1, 2, 3, 4, 5].map(boxNum => {
+        const count = boxCounts[boxNum] || 0;
+        const percent = Math.round((count / appData.length) * 100);
+        return `
+          <div class="flex items-center text-xs font-mono gap-2">
+            <span class="w-12 text-slate-400">BOX ${boxNum}:</span>
+            <div class="flex-1 h-3 bg-slate-950 rounded-full border border-slate-800 overflow-hidden">
+              <div class="h-full bg-emerald-500 rounded-full" style="width: ${percent}%;"></div>
+            </div>
+            <span class="w-16 text-right font-bold text-emerald-400">${count} (${percent}%)</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function closeStatsModal() {
+      document.getElementById('statsModal').classList.add('hidden');
+    }
+
+    function resetAllStatsConfirm() {
+      if (confirm('Möchten Sie die gesamte Lernstatistik (Richtige/Falsche Antworten und Leitner-Stufen) zurücksetzen?')) {
+        appData.forEach(item => {
+          item.box = 1;
+          item.correctCount = 0;
+          item.wrongCount = 0;
+        });
+        saveStorageData();
+        showStatsModal();
+        alert('Lernstatistik wurde erfolgreich zurückgesetzt!');
+      }
+    }
+
+    function exportStatsJSON() {
+      const statsOnly = appData.map(i => ({
+        id: i.id,
+        plu: i.plu,
+        name: i.name,
+        box: i.box || 1,
+        correctCount: i.correctCount || 0,
+        wrongCount: i.wrongCount || 0
+      }));
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(statsOnly, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `PLU_Lernstatistik_${new Date().toISOString().slice(0,10)}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    }
+  </script>
+</body>
+</html>
