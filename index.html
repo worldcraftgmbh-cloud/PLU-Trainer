@@ -151,7 +151,7 @@
           <div class="p-3.5 rounded-xl bg-slate-800/80 border border-slate-700/80">
             <span class="text-xs text-slate-400 font-mono block mb-1">BILDQUELLE</span>
             <div class="text-sm font-bold text-cyan-400 flex items-center gap-2">
-              <span>📁</span> Ordner Leergut_Bilder/
+              <span>📁</span> Ordner leergut_bilder/
             </div>
           </div>
         </div>
@@ -218,7 +218,7 @@
                 </svg>
               </div>
               <span class="text-xs font-bold text-slate-400 tracking-wider">NEUTRALER PLATZHALTER</span>
-              <span class="text-[11px] text-slate-500 mt-0.5">Keine Bilddatei in Leergut_Bilder/ hinterlegt</span>
+              <span class="text-[11px] text-slate-500 mt-0.5">Keine Bilddatei in leergut_bilder/ hinterlegt</span>
             </div>
 
             <!-- Leitner Box Tag overlay -->
@@ -308,7 +308,7 @@
             <h2 class="text-lg font-bold text-white flex items-center gap-2">
               <span>📚</span> ARTIKEL & BILDER BIBLIOTHEK
             </h2>
-            <p class="text-xs text-slate-400">Alle Bilder werden direkt aus dem Ordner <code class="text-emerald-400">Leergut_Bilder/</code> geladen.</p>
+            <p class="text-xs text-slate-400">Alle Bilder werden direkt aus dem Ordner <code class="text-emerald-400">leergut_bilder/</code> geladen.</p>
           </div>
           <!-- Global Storage Info & Export -->
           <div class="flex items-center gap-2">
@@ -406,52 +406,52 @@
   <script>
     // 50 COMPLETE DEFAULT DATASET WITH DIRECT IMAGE FOLDER PATHS
     const defaultLeergutData = [
-      {"id": 1, "name": "Bierkasten: Duckstein (8 Fl.)", "plu": "9046", "image": "Leergut_Bilder/9046_Bierkasten__Duckstein__8_Fl.jpg"},
+      {"id": 1, "name": "Bierkasten: Duckstein (8 Fl.)", "plu": "9046", "image": "leergut_bilder/9046_Bierkasten__Duckstein__8_Fl.jpg"},
       {"id": 2, "name": "Bierkasten: 10 Fl.", "plu": "9004", "image": null},
-      {"id": 3, "name": "Bierkasten: 11 Fl.", "plu": "9020", "image": "Leergut_Bilder/9020_Bierkasten__11_Fl.jpg"},
-      {"id": 4, "name": "Bierkasten: Bionade (12 Fl.)", "plu": "9014", "image": "Leergut_Bilder/9014_Bierkasten__Bionade__12_Fl.jpg"},
-      {"id": 5, "name": "Bierkasten: Grevensteiner (16 Fl.)", "plu": "9012", "image": "Leergut_Bilder/9012_Bierkasten__Grevensteiner__16.jpg"},
-      {"id": 6, "name": "Bierkasten: Standard (20 Fl.)", "plu": "9010", "image": "Leergut_Bilder/9010_Bierkasten__Standard__20_Fl.jpg"},
-      {"id": 7, "name": "Bierkasten: Standard (24 Fl.)", "plu": "9011", "image": "Leergut_Bilder/9011_Bierkasten__Standard__24_Fl.jpg"},
-      {"id": 8, "name": "Bierkasten: 27 Fl.", "plu": "8150", "image": "Leergut_Bilder/8150_Bierkasten__27_Fl.jpg"},
-      {"id": 9, "name": "Bierkasten: 30 Fl.", "plu": "9007", "image": "Leergut_Bilder/9007_Bierkasten__30_Fl.jpg"},
-      {"id": 10, "name": "Bierkasten: Mönchshof (9 BV)", "plu": "9022", "image": "Leergut_Bilder/9022_Bierkasten__Mönchshof__9_BV.jpg"},
-      {"id": 11, "name": "Bierkasten: Bügel (16 BV)", "plu": "9013", "image": "Leergut_Bilder/9013_Bierkasten__Bügel__16_BV.jpg"},
-      {"id": 12, "name": "Bierkasten: Bügel (20 BV)", "plu": "9008", "image": "Leergut_Bilder/9008_Bierkasten__Bügel__20_BV.jpg"},
-      {"id": 13, "name": "Bierkasten: Halbkasten (10 Fl.)", "plu": "9910", "image": "Leergut_Bilder/9910_Bierkasten__Halbkasten__10_Fl.jpg"},
-      {"id": 14, "name": "PET-Kasten: 6 Fl.", "plu": "9122", "image": "Leergut_Bilder/9122_PET-Kasten__6_Fl.jpg"},
-      {"id": 15, "name": "PET-Kasten: 9 Fl.", "plu": "9133", "image": "Leergut_Bilder/9133_PET-Kasten__9_Fl.jpg"},
-      {"id": 16, "name": "PET-Kasten: Apollinaris (10 Fl.)", "plu": "9121", "image": "Leergut_Bilder/9121_PET-Kasten__Apollinaris__10_Fl.jpg"},
-      {"id": 17, "name": "PET-Kasten: 12 Fl.", "plu": "9125", "image": "Leergut_Bilder/9125_PET-Kasten__12_Fl.jpg"},
-      {"id": 18, "name": "PET-Kasten: blau (12 Fl.)", "plu": "9149", "image": "Leergut_Bilder/9149_PET-Kasten__blau__12_Fl.jpg"},
-      {"id": 19, "name": "PET-Kasten: 20 Fl.", "plu": "9140", "image": "Leergut_Bilder/9140_PET-Kasten__20_Fl.jpg"},
-      {"id": 20, "name": "PET-Cycle: Volvic / Evian (6 Fl.)", "plu": "9003", "image": "Leergut_Bilder/9003_PET-Cycle__Volvic___Evian__6_F.jpg"},
-      {"id": 21, "name": "PET-Cycle: 9 Fl.", "plu": "9138", "image": "Leergut_Bilder/9138_PET-Cycle__9_Fl.jpg"},
-      {"id": 22, "name": "PET-Cycle: 12 Fl.", "plu": "9137", "image": "Leergut_Bilder/9137_PET-Cycle__12_Fl.jpg"},
-      {"id": 23, "name": "PET-Cycle: Coca Cola 0,5l (12 Fl.)", "plu": "9170", "image": "Leergut_Bilder/9170_PET-Cycle__Coca_Cola_0_5l__12.jpg"},
-      {"id": 24, "name": "Sonstiges: Weinkiste", "plu": "9154", "image": "Leergut_Bilder/9154_Sonstiges__Weinkiste.jpg"},
-      {"id": 25, "name": "Sonstiges: Rother 3,0 Ltr.", "plu": "9075", "image": "Leergut_Bilder/9075_Sonstiges__Rother_3_0_Ltr.jpg"},
-      {"id": 26, "name": "AFG-Kasten: 6 Fl.", "plu": "9112", "image": "Leergut_Bilder/9112_AFG-Kasten__6_Fl.jpg"},
-      {"id": 27, "name": "AFG-Kasten: Lauretana (6 Fl.)", "plu": "9163", "image": "Leergut_Bilder/9163_AFG-Kasten__Lauretana__6_Fl.jpg"},
+      {"id": 3, "name": "Bierkasten: 11 Fl.", "plu": "9020", "image": "leergut_bilder/9020_Bierkasten__11_Fl.jpg"},
+      {"id": 4, "name": "Bierkasten: Bionade (12 Fl.)", "plu": "9014", "image": "leergut_bilder/9014_Bierkasten__Bionade__12_Fl.jpg"},
+      {"id": 5, "name": "Bierkasten: Grevensteiner (16 Fl.)", "plu": "9012", "image": "leergut_bilder/9012_Bierkasten__Grevensteiner__16.jpg"},
+      {"id": 6, "name": "Bierkasten: Standard (20 Fl.)", "plu": "9010", "image": "leergut_bilder/9010_Bierkasten__Standard__20_Fl.jpg"},
+      {"id": 7, "name": "Bierkasten: Standard (24 Fl.)", "plu": "9011", "image": "leergut_bilder/9011_Bierkasten__Standard__24_Fl.jpg"},
+      {"id": 8, "name": "Bierkasten: 27 Fl.", "plu": "8150", "image": "leergut_bilder/8150_Bierkasten__27_Fl.jpg"},
+      {"id": 9, "name": "Bierkasten: 30 Fl.", "plu": "9007", "image": "leergut_bilder/9007_Bierkasten__30_Fl.jpg"},
+      {"id": 10, "name": "Bierkasten: Mönchshof (9 BV)", "plu": "9022", "image": "leergut_bilder/9022_Bierkasten__Mönchshof__9_BV.jpg"},
+      {"id": 11, "name": "Bierkasten: Bügel (16 BV)", "plu": "9013", "image": "leergut_bilder/9013_Bierkasten__Bügel__16_BV.jpg"},
+      {"id": 12, "name": "Bierkasten: Bügel (20 BV)", "plu": "9008", "image": "leergut_bilder/9008_Bierkasten__Bügel__20_BV.jpg"},
+      {"id": 13, "name": "Bierkasten: Halbkasten (10 Fl.)", "plu": "9910", "image": "leergut_bilder/9910_Bierkasten__Halbkasten__10_Fl.jpg"},
+      {"id": 14, "name": "PET-Kasten: 6 Fl.", "plu": "9122", "image": "leergut_bilder/9122_PET-Kasten__6_Fl.jpg"},
+      {"id": 15, "name": "PET-Kasten: 9 Fl.", "plu": "9133", "image": "leergut_bilder/9133_PET-Kasten__9_Fl.jpg"},
+      {"id": 16, "name": "PET-Kasten: Apollinaris (10 Fl.)", "plu": "9121", "image": "leergut_bilder/9121_PET-Kasten__Apollinaris__10_Fl.jpg"},
+      {"id": 17, "name": "PET-Kasten: 12 Fl.", "plu": "9125", "image": "leergut_bilder/9125_PET-Kasten__12_Fl.jpg"},
+      {"id": 18, "name": "PET-Kasten: blau (12 Fl.)", "plu": "9149", "image": "leergut_bilder/9149_PET-Kasten__blau__12_Fl.jpg"},
+      {"id": 19, "name": "PET-Kasten: 20 Fl.", "plu": "9140", "image": "leergut_bilder/9140_PET-Kasten__20_Fl.jpg"},
+      {"id": 20, "name": "PET-Cycle: Volvic / Evian (6 Fl.)", "plu": "9003", "image": "leergut_bilder/9003_PET-Cycle__Volvic___Evian__6_F.jpg"},
+      {"id": 21, "name": "PET-Cycle: 9 Fl.", "plu": "9138", "image": "leergut_bilder/9138_PET-Cycle__9_Fl.jpg"},
+      {"id": 22, "name": "PET-Cycle: 12 Fl.", "plu": "9137", "image": "leergut_bilder/9137_PET-Cycle__12_Fl.jpg"},
+      {"id": 23, "name": "PET-Cycle: Coca Cola 0,5l (12 Fl.)", "plu": "9170", "image": "leergut_bilder/9170_PET-Cycle__Coca_Cola_0_5l__12.jpg"},
+      {"id": 24, "name": "Sonstiges: Weinkiste", "plu": "9154", "image": "leergut_bilder/9154_Sonstiges__Weinkiste.jpg"},
+      {"id": 25, "name": "Sonstiges: Rother 3,0 Ltr.", "plu": "9075", "image": "leergut_bilder/9075_Sonstiges__Rother_3_0_Ltr.jpg"},
+      {"id": 26, "name": "AFG-Kasten: 6 Fl.", "plu": "9112", "image": "leergut_bilder/9112_AFG-Kasten__6_Fl.jpg"},
+      {"id": 27, "name": "AFG-Kasten: Lauretana (6 Fl.)", "plu": "9163", "image": "leergut_bilder/9163_AFG-Kasten__Lauretana__6_Fl.jpg"},
       {"id": 28, "name": "AFG-Kasten: 10 Fl.", "plu": "9131", "image": null},
-      {"id": 29, "name": "AFG-Kasten: Standard (12 Fl.)", "plu": "9110", "image": "Leergut_Bilder/9110_AFG-Kasten__Standard__12_Fl.jpg"},
-      {"id": 30, "name": "AFG-Kasten: Orangina (15 Fl.)", "plu": "9127", "image": "Leergut_Bilder/9127_AFG-Kasten__Orangina__15_Fl.jpg"},
-      {"id": 31, "name": "AFG-Kasten: S. Pellegrino (16 Fl.)", "plu": "9115", "image": "Leergut_Bilder/9115_AFG-Kasten__S__Pellegrino__16.jpg"},
-      {"id": 32, "name": "AFG-Kasten: 20 Fl.", "plu": "9113", "image": "Leergut_Bilder/9113_AFG-Kasten__20_Fl.jpg"},
-      {"id": 33, "name": "AFG-Kasten: Standard (24 Fl.)", "plu": "9111", "image": "Leergut_Bilder/9111_AFG-Kasten__Standard__24_Fl.jpg"},
-      {"id": 34, "name": "AFG-Kasten: Schweppes (24 Fl.)", "plu": "9029", "image": "Leergut_Bilder/9029_AFG-Kasten__Schweppes__24_Fl.jpg"},
-      {"id": 35, "name": "Einzelflasche: Bier", "plu": "9001", "image": "Leergut_Bilder/9001_Einzelflasche__Bier.jpg"},
-      {"id": 36, "name": "Einzelflasche: Schweppes 0,2l", "plu": "9028", "image": "Leergut_Bilder/9028_Einzelflasche__Schweppes_0_2l.jpg"},
-      {"id": 37, "name": "Einzelflasche: Bier BV (Bügel)", "plu": "9030", "image": "Leergut_Bilder/9030_Einzelflasche__Bier_BV__Bügel.jpg"},
-      {"id": 38, "name": "Einzelflasche: AFG", "plu": "9102", "image": "Leergut_Bilder/9102_Einzelflasche__AFG.jpg"},
-      {"id": 39, "name": "Einzelflasche: PET", "plu": "9103", "image": "Leergut_Bilder/9103_Einzelflasche__PET.jpg"},
-      {"id": 40, "name": "Einzelflasche: Atlanta / Spezi", "plu": "9108", "image": "Leergut_Bilder/9108_Einzelflasche__Atlanta___Spezi.jpg"},
-      {"id": 41, "name": "Einzelflasche: Weinflasche", "plu": "9155", "image": "Leergut_Bilder/9155_Einzelflasche__Weinflasche.jpg"},
-      {"id": 42, "name": "Einweg: DPG Dose / Einweg", "plu": "9254", "image": "Leergut_Bilder/9254_Einweg__DPG_Dose___Einweg.jpg"},
-      {"id": 43, "name": "Fass: Standard Fass", "plu": "9055", "image": "Leergut_Bilder/9055_Fass__Standard_Fass.jpg"},
-      {"id": 44, "name": "Fass: Perfect Draft mit Rahmen", "plu": "9049", "image": "Leergut_Bilder/9049_Fass__Perfect_Draft_mit_Rahmen.jpg"},
-      {"id": 45, "name": "Fass: Perfect Draft solo", "plu": "9052", "image": "Leergut_Bilder/9052_Fass__Perfect_Draft_solo.jpg"},
-      {"id": 46, "name": "Fass: Keggy Partyfass", "plu": "9016", "image": "Leergut_Bilder/9016_Fass__Keggy_Partyfass.jpg"},
+      {"id": 29, "name": "AFG-Kasten: Standard (12 Fl.)", "plu": "9110", "image": "leergut_bilder/9110_AFG-Kasten__Standard__12_Fl.jpg"},
+      {"id": 30, "name": "AFG-Kasten: Orangina (15 Fl.)", "plu": "9127", "image": "leergut_bilder/9127_AFG-Kasten__Orangina__15_Fl.jpg"},
+      {"id": 31, "name": "AFG-Kasten: S. Pellegrino (16 Fl.)", "plu": "9115", "image": "leergut_bilder/9115_AFG-Kasten__S__Pellegrino__16.jpg"},
+      {"id": 32, "name": "AFG-Kasten: 20 Fl.", "plu": "9113", "image": "leergut_bilder/9113_AFG-Kasten__20_Fl.jpg"},
+      {"id": 33, "name": "AFG-Kasten: Standard (24 Fl.)", "plu": "9111", "image": "leergut_bilder/9111_AFG-Kasten__Standard__24_Fl.jpg"},
+      {"id": 34, "name": "AFG-Kasten: Schweppes (24 Fl.)", "plu": "9029", "image": "leergut_bilder/9029_AFG-Kasten__Schweppes__24_Fl.jpg"},
+      {"id": 35, "name": "Einzelflasche: Bier", "plu": "9001", "image": "leergut_bilder/9001_Einzelflasche__Bier.jpg"},
+      {"id": 36, "name": "Einzelflasche: Schweppes 0,2l", "plu": "9028", "image": "leergut_bilder/9028_Einzelflasche__Schweppes_0_2l.jpg"},
+      {"id": 37, "name": "Einzelflasche: Bier BV (Bügel)", "plu": "9030", "image": "leergut_bilder/9030_Einzelflasche__Bier_BV__Bügel.jpg"},
+      {"id": 38, "name": "Einzelflasche: AFG", "plu": "9102", "image": "leergut_bilder/9102_Einzelflasche__AFG.jpg"},
+      {"id": 39, "name": "Einzelflasche: PET", "plu": "9103", "image": "leergut_bilder/9103_Einzelflasche__PET.jpg"},
+      {"id": 40, "name": "Einzelflasche: Atlanta / Spezi", "plu": "9108", "image": "leergut_bilder/9108_Einzelflasche__Atlanta___Spezi.jpg"},
+      {"id": 41, "name": "Einzelflasche: Weinflasche", "plu": "9155", "image": "leergut_bilder/9155_Einzelflasche__Weinflasche.jpg"},
+      {"id": 42, "name": "Einweg: DPG Dose / Einweg", "plu": "9254", "image": "leergut_bilder/9254_Einweg__DPG_Dose___Einweg.jpg"},
+      {"id": 43, "name": "Fass: Standard Fass", "plu": "9055", "image": "leergut_bilder/9055_Fass__Standard_Fass.jpg"},
+      {"id": 44, "name": "Fass: Perfect Draft mit Rahmen", "plu": "9049", "image": "leergut_bilder/9049_Fass__Perfect_Draft_mit_Rahmen.jpg"},
+      {"id": 45, "name": "Fass: Perfect Draft solo", "plu": "9052", "image": "leergut_bilder/9052_Fass__Perfect_Draft_solo.jpg"},
+      {"id": 46, "name": "Fass: Keggy Partyfass", "plu": "9016", "image": "leergut_bilder/9016_Fass__Keggy_Partyfass.jpg"},
       {"id": 47, "name": "Leerkasten / Rahmen: AFG / Bier", "plu": "9000", "image": null},
       {"id": 48, "name": "Leerkasten / Rahmen: PET", "plu": "9100", "image": null},
       {"id": 49, "name": "Leerkasten / Rahmen: Rahmen halb", "plu": "9900", "image": null},
