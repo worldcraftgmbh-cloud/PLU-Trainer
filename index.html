@@ -611,6 +611,38 @@
 
           osc.start(now);
           osc.stop(now + 0.3);
+        } else if (type === 'victory') {
+          // Fröhlich aufsteigende Victory-Fanfare (C5 -> E5 -> G5 -> C6)
+          const notes = [523.25, 659.25, 783.99, 1046.50];
+          notes.forEach((freq, i) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            const noteTime = now + (i * 0.09);
+            osc.type = i === 3 ? 'triangle' : 'sine';
+            osc.frequency.setValueAtTime(freq, noteTime);
+            gain.gain.setValueAtTime(0.25, noteTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, noteTime + (i === 3 ? 0.35 : 0.12));
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(noteTime);
+            osc.stop(noteTime + (i === 3 ? 0.35 : 0.12));
+          });
+        } else if (type === 'defeat') {
+          // Kurzer, absteigender Defeat-Jingle (Eb4 -> D4 -> C4)
+          const notes = [311.13, 293.66, 261.63];
+          notes.forEach((freq, i) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            const noteTime = now + (i * 0.12);
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(freq, noteTime);
+            gain.gain.setValueAtTime(0.2, noteTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, noteTime + 0.18);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(noteTime);
+            osc.stop(noteTime + 0.18);
+          });
         }
       } catch (e) {
         console.error('Audio playback error:', e);
@@ -919,6 +951,12 @@
       document.getElementById('summaryCorrectCount').innerText = `${roundCorrectCount} / 10`;
       const accuracy = Math.round((roundCorrectCount / 10) * 100);
       document.getElementById('summaryAccuracy').innerText = `${accuracy}%`;
+
+      if (accuracy >= 50) {
+        playSound('victory');
+      } else {
+        playSound('defeat');
+      }
     }
 
 
