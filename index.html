@@ -258,6 +258,21 @@
           </button>
         </div>
 
+        <!-- 4b. ALTERNATIVE FREIE PLU-EINGABE (10% DER FRAGEN) -->
+        <div id="directInputArea" class="hidden flex flex-col gap-3">
+          <div class="relative">
+            <input type="text" id="pluTextInput" pattern="[0-9]*" inputmode="numeric" maxlength="6"
+              placeholder="PLU-Nummer hier eingeben (z. B. 9010)..."
+              onkeydown="if(event.key === 'Enter') submitDirectPLUAnswer()"
+              class="w-full py-4 px-5 rounded-2xl bg-slate-900 border-2 border-slate-700 focus:border-emerald-500 font-mono font-black text-2xl text-center text-white placeholder-slate-600 focus:outline-none shadow-lg tracking-widest transition-all">
+            <span class="absolute left-4 top-2 text-[10px] font-mono text-emerald-400 uppercase tracking-wider">⌨️ Freie PLU-Eingabe (10% Chance)</span>
+          </div>
+          <button onclick="submitDirectPLUAnswer()" id="submitPluBtn"
+            class="w-full py-3.5 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-base shadow-lg shadow-emerald-500/25 transition-all transform active:scale-95 flex items-center justify-center gap-2">
+            <span>✓</span> PLU BESTÄTIGEN
+          </button>
+        </div>
+
         <!-- Action / Next Question Controls -->
         <div id="nextQuestionArea" class="hidden mt-1 text-center flex items-center justify-between gap-3">
           <div id="feedbackMessage" class="text-sm font-bold text-emerald-400 flex items-center gap-2">
@@ -665,6 +680,11 @@
       }
 
       quizQuestions = Array.from(selected).map(item => createQuestionObj(item));
+      
+      // Genau 1 Frage von 10 (10%) ist eine freie PLU-Tastatur-Eingabe
+      const inputQuestionIdx = Math.floor(Math.random() * 10);
+      quizQuestions[inputQuestionIdx].type = 'input';
+
       renderCurrentQuestion();
     }
 
@@ -690,7 +710,8 @@
 
       return {
         item: targetItem,
-        options: options
+        options: options,
+        type: 'choice'
       };
     }
 
@@ -739,12 +760,30 @@
       }
 
       // 4. Antwort-Optionen Reset & Render
-      qObj.options.forEach((opt, idx) => {
-        const btn = document.getElementById(`optBtn${idx}`);
-        btn.innerText = opt.plu;
-        btn.disabled = false;
-        btn.className = "quiz-opt-btn min-h-[64px] sm:min-h-[72px] p-3 rounded-2xl bg-slate-900/90 border border-slate-700/80 hover:border-emerald-500/60 hover:bg-slate-800 text-white font-mono font-black text-xl sm:text-2xl shadow-md transition-all transform active:scale-95 flex items-center justify-center text-center";
-      });
+      const optionsGrid = document.getElementById('optionsGrid');
+      const directInputArea = document.getElementById('directInputArea');
+      const pluTextInput = document.getElementById('pluTextInput');
+      const submitPluBtn = document.getElementById('submitPluBtn');
+
+      if (qObj.type === 'input') {
+        optionsGrid.classList.add('hidden');
+        directInputArea.classList.remove('hidden');
+        pluTextInput.value = '';
+        pluTextInput.disabled = false;
+        pluTextInput.className = "w-full py-4 px-5 rounded-2xl bg-slate-900 border-2 border-slate-700 focus:border-emerald-500 font-mono font-black text-2xl text-center text-white placeholder-slate-600 focus:outline-none shadow-lg tracking-widest transition-all";
+        submitPluBtn.disabled = false;
+        submitPluBtn.className = "w-full py-3.5 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-base shadow-lg shadow-emerald-500/25 transition-all transform active:scale-95 flex items-center justify-center gap-2";
+        setTimeout(() => pluTextInput.focus(), 150);
+      } else {
+        optionsGrid.classList.remove('hidden');
+        directInputArea.classList.add('hidden');
+        qObj.options.forEach((opt, idx) => {
+          const btn = document.getElementById(`optBtn${idx}`);
+          btn.innerText = opt.plu;
+          btn.disabled = false;
+          btn.className = "quiz-opt-btn min-h-[64px] sm:min-h-[72px] p-3 rounded-2xl bg-slate-900/90 border border-slate-700/80 hover:border-emerald-500/60 hover:bg-slate-800 text-white font-mono font-black text-xl sm:text-2xl shadow-md transition-all transform active:scale-95 flex items-center justify-center text-center";
+        });
+      }
     }
 
     function handleAnswerSelect(selectedIdx) {
@@ -796,6 +835,62 @@
 
         feedbackMessage.className = "text-sm font-bold text-red-400 flex items-center gap-2";
         feedbackMessage.innerHTML = `<span>❌ Falsch!</span> <span class='text-xs font-normal text-slate-300'>Richtige PLU ist <strong class='text-emerald-400 font-mono'>${item.plu}</strong></span>`;
+      }
+
+      saveStorageData();
+
+      const totalAnswered = roundCorrectCount + roundWrongCount;
+      const hitRate = Math.round((roundCorrectCount / totalAnswered) * 100);
+      document.getElementById('hitRateBadge').innerText = `Trefferquote: ${hitRate}%`;
+      document.getElementById('scoreText').innerText = `${roundCorrectCount} / ${totalAnswered} Richtig`;
+
+      document.getElementById('nextQuestionArea').classList.remove('hidden');
+    }
+
+    
+    function submitDirectPLUAnswer() {
+      if (isAnsweredCurrent) return;
+
+      const pluTextInput = document.getElementById('pluTextInput');
+      const submitPluBtn = document.getElementById('submitPluBtn');
+      const enteredVal = pluTextInput.value.trim();
+
+      if (!enteredVal) {
+        pluTextInput.classList.add('animate-shake');
+        setTimeout(() => pluTextInput.classList.remove('animate-shake'), 400);
+        return;
+      }
+
+      isAnsweredCurrent = true;
+      pluTextInput.disabled = true;
+      submitPluBtn.disabled = true;
+
+      const qObj = quizQuestions[currentQuestionIndex];
+      const item = qObj.item;
+      const feedbackMessage = document.getElementById('feedbackMessage');
+
+      if (enteredVal === item.plu) {
+        // CORRECT DIRECT INPUT
+        playSound('correct');
+        roundCorrectCount++;
+
+        item.box = Math.min(5, (item.box || 1) + 1);
+        item.correctCount = (item.correctCount || 0) + 1;
+
+        pluTextInput.className = "w-full py-4 px-5 rounded-2xl bg-emerald-950/60 border-2 border-emerald-400 font-mono font-black text-2xl text-center text-emerald-300 shadow-lg neon-pulse tracking-widest";
+        feedbackMessage.className = "text-sm font-bold text-emerald-400 flex items-center gap-2";
+        feedbackMessage.innerHTML = `<span>✅ Richtig!</span> <span class='text-xs font-normal text-slate-300'>PLU <strong>${item.plu}</strong> korrekt eingegeben (+1 Box)</span>`;
+      } else {
+        // INCORRECT DIRECT INPUT
+        playSound('wrong');
+        roundWrongCount++;
+
+        item.box = 1;
+        item.wrongCount = (item.wrongCount || 0) + 1;
+
+        pluTextInput.className = "w-full py-4 px-5 rounded-2xl bg-red-950/60 border-2 border-red-400 font-mono font-black text-2xl text-center text-red-300 shadow-lg animate-shake tracking-widest";
+        feedbackMessage.className = "text-sm font-bold text-red-400 flex items-center gap-2";
+        feedbackMessage.innerHTML = `<span>❌ Falsch!</span> <span class='text-xs font-normal text-slate-300'>Eingegeben: ${enteredVal} — Richtige PLU ist <strong class='text-emerald-400 font-mono'>${item.plu}</strong></span>`;
       }
 
       saveStorageData();
